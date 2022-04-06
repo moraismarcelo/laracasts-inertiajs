@@ -3,17 +3,25 @@
         <title> Users</title>
     </Head>
   <h1>Users</h1>
-  <ul>
-    <li v-for="user in users" key="user.id">{{user.name}}</li>
-  </ul>
 
+  <table class="table-auto">
+  <tbody>
+    <tr v-for="user in users.data" key="user.id">
+      <td>{{user.name}}</td>
+    </tr>
+  </tbody>
+</table>
+<!-- Pagination -->
+
+<Pagination :links="users.links" class="mt-6"/>
 
 </template>
 
 
 <script setup>
+    import Pagination from '../Shared/Pagination.vue'
     defineProps({
-        users: Array
+        users: Object
     })
 
 </script>
