@@ -3,6 +3,7 @@
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,14 +28,44 @@ Route::get('/', function () {
 });
 
 Route::get('/users', function () {
-    return Inertia::render('Users',[
-        'users' => User::paginate(10)->through(function($q){
+    return Inertia::render('Users/Index',[
+        'users' => User::query()
+            ->when(Request::input('search'), function($query, $search){
+                $query->where('name', 'like', "%{$search}%");
+            })
+            ->paginate(10)
+            ->withQueryString()
+            ->through(function($q){
             return [
                 'id' => $q->id,
                 'name' => $q->name
             ];
-        })
+        }),
+        'filters' => Request::only([
+            'search'
+        ])
     ]);
+
+});
+
+Route::post('/users', function () {
+    Request::validate([
+        'name' => 'required',
+        'email' => ['required', 'email'],
+        'password' => ['required', 'min:5']
+    ]);
+
+    User::create([
+        'name' => Request::input('name'),
+        'email' => Request::input('email'),
+        'password' => bcrypt(Request::input('password'))
+    ]);
+
+    return redirect('/users');
+});
+
+Route::get('/users/create', function () {
+    return Inertia::render('Users/Create');
 
 });
 
